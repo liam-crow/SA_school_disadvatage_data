@@ -47,10 +47,29 @@ str(school_data)
 
 table(school_data$type)
 
+median(school_data$index)
+mean(school_data$index)
+
 library(lattice)
 bwplot(index ~ type, school_data,
        scales=list(x=list(rot=45)))
 
-densityplot(~index | type, school_data)
+densityplot(~index, school_data)
 
+densityplot(~index, school_data,
+            groups = type, auto.key=list(columns=3))
 
+xyplot(latitude ~ longitude | type, school_data,
+       groups = index, auto.key=list(columns=7))
+
+library(mgcv)
+mod <- gam(index ~ s(longitude, latitude, by = type), data = school_data,
+           family = ocat(R=7))
+mod
+plot(mod)  
+gam.check(mod)
+summary(mod)
+mod$family$getTheta(TRUE) ## the estimated cut points
+
+ ## predict probabilities of being in each category
+predict(mod,dat[1:2,],type="response",se=TRUE)
